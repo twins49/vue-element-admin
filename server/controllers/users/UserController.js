@@ -39,7 +39,6 @@ class UserController
       const pwdMatchFlag = bcrypt.compareSync(param.password, user.pwd); // 用bcrypt的比较方法来验证密码
       if (pwdMatchFlag) {
         const token = guid();
-
         if (!user.token) { // 制造token
           UserModel.update({name:param.username}, {token: token, tokenTime: Date.now()}).exec().then(
              ctx.body = {
@@ -66,11 +65,12 @@ class UserController
               console.log(err)
             })
           } else { // 没过期
+            console.log('没过期',  user.token)
             ctx.body = {
               code:200,
               message:'登录成功',
               data: {
-                token: user.tokenTime,
+                token: user.token,
               }
             }
           }
@@ -130,7 +130,27 @@ class UserController
   // 获取用户信息，权限、头像、账号名
   async adminGetUserInfo(ctx) {
     const UserModel = mongoose.model('User');
-    ctx.body = '获取用户信息';
+    const params = ctx.query; // get
+    await UserModel.findOne({token: params.token}, { roles:1, name:1, avatar:1, introduction:1, tokenTime: 1 })
+            .exec().then(async (result) => {
+              // TODO:: 判断token过期没
+              if (this._isTokenTimeOut(result.tokenTime)) {
+                ctx.body = {
+                  code: 204,
+                  message: 'token过期,请重新登录',
+                }
+              } else {
+                ctx.body = {
+                  code: 200,
+                  message: '获取信息成功',
+                  data: {
+                    roles: result.roles,
+                    name: result.name,
+                    avatar: result.avatar,
+                  }
+                }
+              }
+            })
   }
   // 更新用户资料
   async put() {
@@ -196,11 +216,9 @@ class UserController
    * @param {String} Time 需要对比的时间戳
    * @return {Boolean} 是否过期
    */
-  async _isTokenTimeOut(Time) {
-      const tokenTime = moment(Time);
-      const now = moment();
-      if (now.diff(tokenTime, 'days') >= 7) return true;
-      return false;
+    _isTokenTimeOut(Time) {
+      console.log(moment.duration(moment() - moment(Time)).as(`days`));
+      return moment.duration(moment() - moment(Time)).as(`days`) >= 7;
   }
 }
 module.exports = new UserController();

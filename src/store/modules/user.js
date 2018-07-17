@@ -50,9 +50,12 @@ const user = {
       return new Promise((resolve, reject) => {
         loginByUsername(username, userInfo.password).then(response => {
           const data = response.data
-          window.console.log('data', data)
-          setToken(response.data.data.token)
-          resolve()
+          if (data.code === 200) {
+            setToken(data.data.token)
+            commit('SET_TOKEN', data.data.token)
+            resolve()
+          }
+          reject('获取token出错了')
         }).catch(error => {
           reject(error)
         })
@@ -64,12 +67,14 @@ const user = {
       return new Promise((resolve, reject) => {
         getUserInfo(state.token).then(response => {
           const data = response.data
-          window.console.log(data)
-          // commit('SET_ROLES', data.roles)
-          // commit('SET_NAME', data.name)
-          // commit('SET_AVATAR', data.avatar)
-          // commit('SET_INTRODUCTION', data.introduction)
-          resolve(response)
+          window.console.warn(data.data, 111)
+          if (data.code === 200) {
+            commit('SET_ROLES', data.data.roles)
+            commit('SET_NAME', data.data.name)
+            commit('SET_AVATAR', data.data.avatar)
+            commit('SET_INTRODUCTION', data.data.introduction)
+          }
+          resolve(data)
         }).catch(error => {
           reject(error)
         })

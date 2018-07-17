@@ -15,7 +15,7 @@ function hasPermission(roles, route) {
 
 /**
  * 递归过滤异步路由表，返回符合用户角色权限的路由表
- * @param asyncRouterMap
+ * @param asyncRouterMap 路由数组
  * @param roles
  */
 function filterAsyncRouter(asyncRouterMap, roles) {
@@ -47,9 +47,10 @@ const permission = {
       return new Promise(resolve => {
         const { roles } = data
         let accessedRouters
-        if (roles.indexOf('admin') >= 0) {
+        // 如果角色是 admin
+        if (roles.indexOf('admin') >= 0) { // 如果是管理员来，就不用判断了
           accessedRouters = asyncRouterMap
-        } else {
+        } else { // 如果不是管理员觉得，要一个个去对比
           accessedRouters = filterAsyncRouter(asyncRouterMap, roles)
         }
         commit('SET_ROUTERS', accessedRouters)

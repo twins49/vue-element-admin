@@ -15,9 +15,11 @@ const userSchema = new Schema({
   pwd: { type: String, default: '' }, // 密码
   createTime: { type: Date, default: Date.now() }, // 账号创建时间
   lastLogin: { type: Date, default: Date.now() }, // 最后登录时间
-  authority: { type: Number, default: 0 }, // 权限
   token: { type: String, default: '' }, // token
-  tokenTime: { type: Date, default: Date.now() } // token 过期时间
+  tokenTime: { type: Date, default: Date.now() }, // token 过期时间
+  introduction: { type: String, default: '' }, // 账号介绍
+  avatar: { type: String, default: '' }, // 头像
+  roles: { type: Array, default: [] } // 账号权限
 })
 
 // 每次存储数据时都要执行（对密码加密)

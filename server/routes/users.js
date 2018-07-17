@@ -17,7 +17,7 @@ router.post('/accountLists', async(ctx) => {
 })
 
 // 获取后台用户信息
-router.post('/getUserInfo', async(ctx) => {
+router.get('/getUserInfo', async(ctx) => {
   await UserController.adminGetUserInfo(ctx)
 })
 module.exports = router

@@ -3,9 +3,9 @@
  */
 
 export function isvalidUsername(str) {
-  // const valid_map = ['admin', 'editor']
-  // return valid_map.indexOf(str.trim()) >= 0
-  return !!str
+  const valid_map = ['admin', 'editor', 'twins49']
+  return valid_map.indexOf(str.trim()) >= 0
+  // return !!str
 }
 
 /* 合法uri*/

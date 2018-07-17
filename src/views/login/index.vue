@@ -129,7 +129,6 @@ export default {
   },
   created() {
     // window.addEventListener('hashchange', this.afterQRScan)
-    window.console.log('login', this.login)
   },
   destroyed() {
     // window.removeEventListener('hashchange', this.afterQRScan)
