@@ -67,7 +67,6 @@ const user = {
       return new Promise((resolve, reject) => {
         getUserInfo(state.token).then(response => {
           const data = response.data
-          window.console.warn(data.data, 111)
           if (data.code === 200) {
             commit('SET_ROLES', data.data.roles)
             commit('SET_NAME', data.data.name)

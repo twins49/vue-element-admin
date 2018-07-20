@@ -170,7 +170,7 @@ export const asyncRouterMap = [
       icon: 'form'
     },
     children: [
-      { path: 'create-form', component: _import('form/create'), name: 'createForm', meta: { title: 'createForm', icon: 'table' }},
+      { path: 'create-form', component: _import('form/create'), name: 'createForm', meta: { title: '创建表单', icon: 'table' }},
       { path: 'edit-form', component: _import('form/edit'), name: 'editForm', meta: { title: 'editForm', icon: 'table' }}
     ]
   },
@@ -238,6 +238,20 @@ export const asyncRouterMap = [
     path: '/i18n',
     component: Layout,
     children: [{ path: 'index', component: _import('i18n-demo/index'), name: 'i18n', meta: { title: 'i18n', icon: 'international' }}]
+  },
+  {
+    path: '/adminAccout',
+    component: Layout,
+    redirect: 'noredirect',
+    name: 'adminAccout',
+    meta: {
+      title: '后台账号管理',
+      icon: 'user'
+    },
+    children: [
+      { path: 'addAccount', component: _import('adminAccount/add'), name: 'addAccount', meta: { title: '添加', icon: 'el-icon-circle-plus-outline' }},
+      { path: 'edit-form', component: _import('form/edit'), name: 'editForm', meta: { title: 'editForm', icon: 'table' }}
+    ]
   },
 
   { path: '*', redirect: '/404', hidden: true }

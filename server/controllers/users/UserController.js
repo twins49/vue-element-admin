@@ -35,7 +35,8 @@ class UserController
   async adminlogin(ctx) {
     const param = ctx.request.body; // 拿到前端post过来的
     const UserModel = mongoose.model('User');
-    await UserModel.findOne({name:param.username}, { pwd:1, token:1, tokenTime:1 }).exec().then(async (user) => {
+    await UserModel.findOne({name:param.username}, { pwd:1, token:1, tokenTime:1 }).exec()
+      .then(async (user) => {
       const pwdMatchFlag = bcrypt.compareSync(param.password, user.pwd); // 用bcrypt的比较方法来验证密码
       if (pwdMatchFlag) {
         const token = guid();
@@ -82,12 +83,13 @@ class UserController
         }
       }
     })
-      .catch(()=> {
-        ctx.body = {
-          code:500,
-          message:'账号或者密码错误'
-        }
-      })
+    .catch((err)=> {
+      console.log(err);
+      ctx.body = {
+        code:500,
+        message:'账号或者密码错误'
+      }
+    })
 
   }
 
