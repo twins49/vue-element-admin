@@ -47,14 +47,6 @@ export default {
   },
   methods: {
     generateTitle
-  },
-  watch: {
-    routes: {
-      handler(val) {
-        window.console.warn(val)
-      },
-      immediate: true
-    }
   }
 }
 </script>

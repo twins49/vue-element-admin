@@ -249,8 +249,7 @@ export const asyncRouterMap = [
       icon: 'user'
     },
     children: [
-      { path: 'addAccount', component: _import('adminAccount/add'), name: 'addAccount', meta: { title: '添加', icon: 'el-icon-circle-plus-outline' }},
-      { path: 'edit-form', component: _import('form/edit'), name: 'editForm', meta: { title: 'editForm', icon: 'table' }}
+      { path: 'addAccount', component: _import('adminAccount/accountLists'), name: 'accountLists', meta: { title: '账号列表', icon: 'table' }}
     ]
   },
 

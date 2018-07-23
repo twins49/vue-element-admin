@@ -20,4 +20,9 @@ router.post('/accountLists', async(ctx) => {
 router.get('/getUserInfo', async(ctx) => {
   await UserController.adminGetUserInfo(ctx)
 })
+
+// 更新后台用户信息
+router.post('/accountUpdated', async(ctx) => {
+  await UserController.accountUpdated(ctx)
+})
 module.exports = router

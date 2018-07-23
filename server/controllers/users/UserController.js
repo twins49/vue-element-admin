@@ -17,17 +17,25 @@ class UserController
   // 后台用户注册
   adminRegister(ctx) {
     const UserModel = mongoose.model('User');
-    const newUser = new UserModel(ctx.request.body);
-      newUser.save().then(
-        ctx.body = {
-          code:200,
-          message:'注册成功'
-        }
-      ).catch((err)=> {
-        ctx.body = {
-          code:500,
-          message:err
-        }
+    const params = {
+      name: ctx.request.body.name,
+      pwd: ctx.request.body.password,
+      roles: ctx.request.body.roles,
+      introduction: ctx.request.body.introduction
+    }
+    const newUser = new UserModel(params);
+      newUser.save()
+        .then(
+          ctx.body = {
+            code:200,
+            message:'注册成功'
+          }
+      )
+        .catch((err)=> {
+          ctx.body = {
+            code:500,
+            message:err
+          }
       })
   }
 
@@ -109,10 +117,12 @@ class UserController
     // 处理数据
     for (let i = 0; i < users.dataList.length; i++) {
       newArr.push({
-        authority: this._authorityForMat( users.dataList[i]['authority']),
+        roles: this._authorityForMat(users.dataList[i]['roles']),
         createTime: moment( users.dataList[i]['createTime']).format('YYYY-MM-DD HH:mm:ss'),
         lastLogin: moment( users.dataList[i]['lastLogin']).format('YYYY-MM-DD HH:mm:ss'),
         name:  users.dataList[i]['name'],
+        introduction: users.dataList[i]['introduction'],
+        password: users.dataList[i]['pwd']
       });
     }
     result = {
@@ -155,8 +165,21 @@ class UserController
             })
   }
   // 更新用户资料
-  async put() {
-    // await ……
+  async accountUpdated(ctx) {
+    const param = ctx.request.body; // 拿到前端post过来的
+    const UserModel = mongoose.model('User');
+    UserModel.update({name:param.name},
+      {password: param.password, roles: param.roles, introduction: param.introduction}
+    ).exec()
+      .then(
+        ctx.body = {
+        code:200,
+        message:'更新成功',
+      }
+    )
+    .catch((err) => {
+      ctx.body = err;
+    })
   }
 
   // 删除用户
@@ -170,15 +193,12 @@ class UserController
   }
 
   _authorityForMat(authority) {
-    switch (authority) {
-      case 0:
+    switch (authority[0]) {
+      case 'admin':
         return '超级管理员';
         break;
-      case 1:
-        return '管理员';
-        break;
-      default:
-        return '编辑'
+      case 'editor':
+        return '编辑';
         break;
     }
   }
