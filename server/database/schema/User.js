@@ -19,7 +19,8 @@ const userSchema = new Schema({
   tokenTime: { type: Date, default: Date.now() }, // token 过期时间
   introduction: { type: String, default: '' }, // 账号介绍
   avatar: { type: String, default: '' }, // 头像
-  roles: { type: Array, default: [] } // 账号权限
+  roles: { type: Array, default: [] }, // 账号权限
+  email: { type: String, default: '' } // 邮箱
 })
 
 // 每次存储数据时都要执行（对密码加密)

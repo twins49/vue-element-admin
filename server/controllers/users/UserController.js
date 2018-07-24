@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { guid } = require('../../utils/string.js');
 const moment = require('moment'); // 时间插件
+const gravatar = require('gravatar'); // 头像插件
 
 
 /**
@@ -21,7 +22,9 @@ class UserController
       name: ctx.request.body.name,
       pwd: ctx.request.body.password,
       roles: ctx.request.body.roles,
-      introduction: ctx.request.body.introduction
+      introduction: ctx.request.body.introduction,
+      email: ctx.request.body.email,
+      avatar:gravatar.url(ctx.request.body.email, {s: '200', r: 'pg', d: 'mm'})
     }
     const newUser = new UserModel(params);
       newUser.save()
@@ -122,7 +125,9 @@ class UserController
         lastLogin: moment( users.dataList[i]['lastLogin']).format('YYYY-MM-DD HH:mm:ss'),
         name:  users.dataList[i]['name'],
         introduction: users.dataList[i]['introduction'],
-        password: users.dataList[i]['pwd']
+        password: users.dataList[i]['pwd'],
+        email: users.dataList[i]['email'],
+        avatar: users.dataList[i]['avatar']
       });
     }
     result = {

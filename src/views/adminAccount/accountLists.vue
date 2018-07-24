@@ -68,6 +68,9 @@
               <el-option label="编辑" value="editor"></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="邮箱" prop='email'>
+            <el-input type="email" v-model="addAccout.email"></el-input>
+          </el-form-item>
           <el-form-item label="介绍">
             <el-input type="textarea" v-model="addAccout.introduction"></el-input>
           </el-form-item>
@@ -101,6 +104,17 @@
       waves
     },
     data() {
+      // 自定义检验方式
+      const checkEmail = (rule, value, callback) => {
+        const reg = new RegExp('^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$') // 正则表达式
+        if (!value) {
+          return callback(new Error('请填写邮箱'))
+        }
+        if (!reg.test(value)) { // 正则验证不通过，格式不对
+          return callback(new Error('邮箱格式不正确'))
+        }
+        callback()
+      }
       return {
         listQuery: {
           page: 1, // 当前页码
@@ -120,12 +134,14 @@
           name: '',
           password: '',
           roles: '',
-          authority: ''
+          authority: '',
+          email: ''
         },
         rules: {
           name: [{ required: true, message: '账号必须填写', trigger: 'change' }],
           password: [{ required: true, message: '密码必须填写', trigger: 'change' }],
-          authority: [{ required: true, message: '请选择权限', trigger: 'change' }]
+          authority: [{ required: true, message: '请选择权限', trigger: 'change' }],
+          email: [{ require: true, validator: checkEmail, trigger: 'change' }]
         }
       }
     },
@@ -183,11 +199,13 @@
                 })
                 // 关闭对话框
                 this.dialogFormVisible = false
+                location.href = location.href
               })
               .catch(() => {
                 this.$message.error('注册失败')
               })
           }
+          console.log('有错误')
         })
       },
       updateData() {
