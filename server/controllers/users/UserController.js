@@ -6,7 +6,8 @@ const bcrypt = require('bcrypt');
 const { guid } = require('../../utils/string.js');
 const moment = require('moment'); // 时间插件
 const gravatar = require('gravatar'); // 头像插件
-
+const jwt = require('jsonwebtoken'); // Token插件
+const keys = require('../../config/keys.js'); // 配置文件
 
 /**
  * 用户管理类集合（含 后台注册、后台登录、后台账号列表）
@@ -44,48 +45,61 @@ class UserController
 
   // 用户登录
   async adminlogin(ctx) {
-    const param = ctx.request.body; // 拿到前端post过来的
+    const param = ctx.request.body;
     const UserModel = mongoose.model('User');
-    await UserModel.findOne({name:param.username}, { pwd:1, token:1, tokenTime:1 }).exec()
+    await UserModel.findOne({name:param.username}, { pwd:1, id:1, name:1 }).exec()
       .then(async (user) => {
-      const pwdMatchFlag = bcrypt.compareSync(param.password, user.pwd); // 用bcrypt的比较方法来验证密码
-      if (pwdMatchFlag) {
-        const token = guid();
-        if (!user.token) { // 制造token
-          UserModel.update({name:param.username}, {token: token, tokenTime: Date.now()}).exec().then(
-             ctx.body = {
-              code:200,
-              message:'登录成功',
-              data: {
-                token,
-              }
-            }
-          ).catch((err)=> {
-            console.log(err)
-          })
-        } else { // 验证token是否过期
-          if (this._isTokenTimeOut(user.tokenTime)) { // 过期
-            UserModel.update({name:param.username}, {token: token, tokenTime: Date.now()}).exec().then(
-              ctx.body = {
-               code:200,
-               message:'登录成功',
-               data: {
-                 token,
-               }
-             }
-            ).catch((err)=> {
-              console.log(err)
-            })
-          } else { // 没过期
-            console.log('没过期',  user.token)
-            ctx.body = {
-              code:200,
-              message:'登录成功',
-              data: {
-                token: user.token,
-              }
-            }
+        if (!user) {
+          ctx.body = {
+            code: 500,
+            message: '用户不存在'
           }
+        }
+      // 用bcrypt的比较方法来验证密码
+      const pwdMatchFlag = bcrypt.compareSync(param.password, user.pwd);
+      if (pwdMatchFlag) {
+        // const token = guid();
+        // if (!user.token) { // 制造token
+        //   UserModel.update({name:param.username}, {token: token, tokenTime: Date.now()}).exec().then(
+        //      ctx.body = {
+        //       code:200,
+        //       message:'登录成功',
+        //       data: {
+        //         token,
+        //       }
+        //     }
+        //   ).catch((err)=> {
+        //     console.log(err)
+        //   })
+        // } else { // 验证token是否过期
+        //   if (this._isTokenTimeOut(user.tokenTime)) { // 过期
+        //     UserModel.update({name:param.username}, {token: token, tokenTime: Date.now()}).exec().then(
+        //       ctx.body = {
+        //        code:200,
+        //        message:'登录成功',
+        //        data: {
+        //          token,
+        //        }
+        //      }
+        //     ).catch((err)=> {
+        //       console.log(err)
+        //     })
+        //   } else { // 没过期
+        //     console.log('没过期',  user.token)
+        //     ctx.body = {
+        //       code:200,
+        //       message:'登录成功',
+        //       data: {
+        //         token: user.token,
+        //       }
+        //     }
+        //   }
+        // }
+        //TODO:: 加密规则, 加密名字, 过期时间, 箭头函数
+        const token = jwt.sign({ id:user.id, name:user.name }, keys.jwtKey, {expiresIn: keys.tokenExpires})
+        ctx.body = {
+          code: 200,
+          token
         }
       } else {
         ctx.body = {
@@ -95,7 +109,6 @@ class UserController
       }
     })
     .catch((err)=> {
-      console.log(err);
       ctx.body = {
         code:500,
         message:'账号或者密码错误'
