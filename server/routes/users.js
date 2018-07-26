@@ -25,4 +25,9 @@ router.get('/getUserInfo', async(ctx) => {
 router.post('/accountUpdated', async(ctx) => {
   await UserController.accountUpdated(ctx)
 })
+
+// token验证
+router.get('/tokenVerify', async(ctx) => {
+  await UserController.tokenVerify(ctx)
+})
 module.exports = router

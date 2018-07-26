@@ -8,6 +8,8 @@ const moment = require('moment'); // 时间插件
 const gravatar = require('gravatar'); // 头像插件
 const jwt = require('jsonwebtoken'); // Token插件
 const keys = require('../../config/keys.js'); // 配置文件
+const util = require('util')
+const verify = util.promisify(jwt.verify) // 解密
 
 /**
  * 用户管理类集合（含 后台注册、后台登录、后台账号列表）
@@ -47,7 +49,7 @@ class UserController
   async adminlogin(ctx) {
     const param = ctx.request.body;
     const UserModel = mongoose.model('User');
-    await UserModel.findOne({name:param.username}, { pwd:1, id:1, name:1 }).exec()
+    await UserModel.findOne({name:param.username}, { pwd:1, id:1, name:1, token:1 }).exec()
       .then(async (user) => {
         if (!user) {
           ctx.body = {
@@ -95,11 +97,14 @@ class UserController
         //     }
         //   }
         // }
-        //TODO:: 加密规则, 加密名字, 过期时间, 箭头函数
+        //TODO:: 加密规则, 加密名字, 过期时间, (箭头函数)
         const token = jwt.sign({ id:user.id, name:user.name }, keys.jwtKey, {expiresIn: keys.tokenExpires})
         ctx.body = {
           code: 200,
-          token
+          data: {
+            // token: 'Bearer ' + token // Bearer是固定搭配
+            token
+          }
         }
       } else {
         ctx.body = {
@@ -161,15 +166,12 @@ class UserController
   async adminGetUserInfo(ctx) {
     const UserModel = mongoose.model('User');
     const params = ctx.query; // get
-    await UserModel.findOne({token: params.token}, { roles:1, name:1, avatar:1, introduction:1, tokenTime: 1 })
+    const token = ctx.header.authorization  // 获取jwt
+        if (token) {
+          let payload = await verify(token.split(' ')[1], keys.jwtKey)  // // 解密，获取payload
+          if (payload.name) {
+            await UserModel.findOne({ _id: payload.id }, { roles:1, name:1, avatar:1, introduction:1})
             .exec().then(async (result) => {
-              // TODO:: 判断token过期没
-              if (this._isTokenTimeOut(result.tokenTime)) {
-                ctx.body = {
-                  code: 204,
-                  message: 'token过期,请重新登录',
-                }
-              } else {
                 ctx.body = {
                   code: 200,
                   message: '获取信息成功',
@@ -179,8 +181,46 @@ class UserController
                     avatar: result.avatar,
                   }
                 }
+            })
+            .catch((err) => {
+              ctx.body = {
+                code: 500,
+                message: err
               }
             })
+          } else {
+              ctx.body = {
+                code: 204,
+                message: 'token过期,请重新登录',
+              }
+          }
+
+        } else {
+            ctx.body = {
+                message: 'token 错误',
+                code: -1
+            }
+        }
+    // await UserModel.findOne({token: params.token}, { roles:1, name:1, avatar:1, introduction:1, tokenTime: 1 })
+    //         .exec().then(async (result) => {
+    //           // TODO:: 判断token过期没
+    //           if (this._isTokenTimeOut(result.tokenTime)) {
+    //             ctx.body = {
+    //               code: 204,
+    //               message: 'token过期,请重新登录',
+    //             }
+    //           } else {
+    //             ctx.body = {
+    //               code: 200,
+    //               message: '获取信息成功',
+    //               data: {
+    //                 roles: result.roles,
+    //                 name: result.name,
+    //                 avatar: result.avatar,
+    //               }
+    //             }
+    //           }
+    //         })
   }
   // 更新用户资料
   async accountUpdated(ctx) {
@@ -256,9 +296,8 @@ class UserController
    * @param {String} Time 需要对比的时间戳
    * @return {Boolean} 是否过期
    */
-    _isTokenTimeOut(Time) {
-      console.log(moment.duration(moment() - moment(Time)).as(`days`));
-      return moment.duration(moment() - moment(Time)).as(`days`) >= 7;
+  tokenVerify() {
+
   }
 }
 module.exports = new UserController();
