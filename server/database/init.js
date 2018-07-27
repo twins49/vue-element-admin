@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const db = 'mongodb://localhost/shop'
+const db = 'mongodb://localhost/shop' // 库名字
 
 const glob = require('glob')
 
@@ -9,12 +9,11 @@ const { resolve } = require('path')
 // 导出所有的 schema 结构表
 exports.initSchemas = () => {
   glob.sync(resolve(__dirname, './schema/', '**/*.js')).forEach(require)
-};
+}
 
 //
 exports.connect = () => {
   let maxConnectTime = 0
-  // 连接数据库
   mongoose.connect(db) // 连接数据库
 
   return new Promise((resolve, reject) => {
@@ -48,4 +47,4 @@ exports.connect = () => {
       resolve() // 记得一定要有这个
     })
   })
-};
+}

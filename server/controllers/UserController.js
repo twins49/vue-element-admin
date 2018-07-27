@@ -2,12 +2,12 @@
 const Koa = require('koa');
 const app = new Koa();
 const mongoose = require('mongoose');
+const moment = require('moment');
 const bcrypt = require('bcrypt');
-const { guid } = require('../../utils/string.js');
-const moment = require('moment'); // 时间插件
+const { guid } = require('../utils/string.js');
 const gravatar = require('gravatar'); // 头像插件
 const jwt = require('jsonwebtoken'); // Token插件
-const keys = require('../../config/keys.js'); // 配置文件
+const keys = require('../config/keys.js'); // 配置文件
 
 
 /**
@@ -129,7 +129,6 @@ class UserController
     const UserModel = mongoose.model('User');
     const params = ctx.query; // get
     const token = ctx.header.authorization  // 获取jwt
-    console.log(token);
     let payload = await this.tokenVerify(token, keys.jwtKey);
     if (payload.id) {
         await UserModel.findOne({ _id: payload.id }, { roles:1, name:1, avatar:1, introduction:1})

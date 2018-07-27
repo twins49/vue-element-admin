@@ -1,5 +1,5 @@
 const router = require('koa-router')()
-const UserController = require('../controllers/users/UserController.js')
+const UserController = require('../controllers/UserController.js')
 
 // 后台登录
 router.post('/login', async(ctx) => {
