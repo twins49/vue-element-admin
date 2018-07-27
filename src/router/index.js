@@ -170,7 +170,7 @@ export const asyncRouterMap = [
       icon: 'form'
     },
     children: [
-      { path: 'create-form', component: _import('form/create'), name: 'createForm', meta: { title: '创建表单', icon: 'table' }},
+      { path: 'create-form', component: _import('form/create'), name: 'createForm', meta: { title: 'createForm', icon: 'table' }},
       { path: 'edit-form', component: _import('form/edit'), name: 'editForm', meta: { title: 'editForm', icon: 'table' }}
     ]
   },
@@ -245,11 +245,11 @@ export const asyncRouterMap = [
     redirect: 'noredirect',
     name: 'adminAccout',
     meta: {
-      title: '后台账号管理',
+      title: 'adminACountManage',
       icon: 'user'
     },
     children: [
-      { path: 'addAccount', component: _import('adminAccount/accountLists'), name: 'accountLists', meta: { title: '账号列表', icon: 'table' }}
+      { path: 'addAccount', component: _import('adminAccount/accountLists'), name: 'accountLists', meta: { title: 'accountLists', icon: 'table' }}
     ]
   },
 

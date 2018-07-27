@@ -45,7 +45,9 @@ export default {
     exportZip: 'zip',
     theme: '换肤',
     clipboardDemo: 'clipboard',
-    i18n: '国际化'
+    i18n: '国际化',
+    adminACountManage: '后台管理员列表',
+    accountLists: '账号列表'
   },
   navbar: {
     logOut: '退出登录',

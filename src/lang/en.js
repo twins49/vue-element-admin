@@ -45,7 +45,9 @@ export default {
     exportZip: 'Zip',
     theme: 'Theme',
     clipboardDemo: 'Clipboard',
-    i18n: 'I18n'
+    i18n: 'I18n',
+    adminACountManage: 'adminACountManage',
+    accountLists: 'accountLists'
   },
   navbar: {
     logOut: 'Log Out',
