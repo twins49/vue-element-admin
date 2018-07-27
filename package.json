@@ -1,9 +1,8 @@
 {
-  "name": "vue-element-admin",
-  "version": "3.6.1",
-  "description": "A magical vue admin. Typical templates for enterprise applications. Newest development stack of vue. Lots of awesome features",
-  "author": "Pan <panfree23@gmail.com>",
-  "license": "MIT",
+  "name": "D.VA Shop",
+  "version": "1.0.1",
+  "description": "D.VA商城后台管理平台",
+  "author": "yoyo",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
