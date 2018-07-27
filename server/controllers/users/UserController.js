@@ -8,8 +8,7 @@ const moment = require('moment'); // 时间插件
 const gravatar = require('gravatar'); // 头像插件
 const jwt = require('jsonwebtoken'); // Token插件
 const keys = require('../../config/keys.js'); // 配置文件
-const util = require('util')
-const verify = util.promisify(jwt.verify) // 解密
+
 
 /**
  * 用户管理类集合（含 后台注册、后台登录、后台账号列表）
@@ -60,43 +59,6 @@ class UserController
       // 用bcrypt的比较方法来验证密码
       const pwdMatchFlag = bcrypt.compareSync(param.password, user.pwd);
       if (pwdMatchFlag) {
-        // const token = guid();
-        // if (!user.token) { // 制造token
-        //   UserModel.update({name:param.username}, {token: token, tokenTime: Date.now()}).exec().then(
-        //      ctx.body = {
-        //       code:200,
-        //       message:'登录成功',
-        //       data: {
-        //         token,
-        //       }
-        //     }
-        //   ).catch((err)=> {
-        //     console.log(err)
-        //   })
-        // } else { // 验证token是否过期
-        //   if (this._isTokenTimeOut(user.tokenTime)) { // 过期
-        //     UserModel.update({name:param.username}, {token: token, tokenTime: Date.now()}).exec().then(
-        //       ctx.body = {
-        //        code:200,
-        //        message:'登录成功',
-        //        data: {
-        //          token,
-        //        }
-        //      }
-        //     ).catch((err)=> {
-        //       console.log(err)
-        //     })
-        //   } else { // 没过期
-        //     console.log('没过期',  user.token)
-        //     ctx.body = {
-        //       code:200,
-        //       message:'登录成功',
-        //       data: {
-        //         token: user.token,
-        //       }
-        //     }
-        //   }
-        // }
         //TODO:: 加密规则, 加密名字, 过期时间, (箭头函数)
         const token = jwt.sign({ id:user.id, name:user.name }, keys.jwtKey, {expiresIn: keys.tokenExpires})
         ctx.body = {
@@ -167,60 +129,33 @@ class UserController
     const UserModel = mongoose.model('User');
     const params = ctx.query; // get
     const token = ctx.header.authorization  // 获取jwt
-        if (token) {
-          let payload = await verify(token.split(' ')[1], keys.jwtKey)  // // 解密，获取payload
-          if (payload.name) {
-            await UserModel.findOne({ _id: payload.id }, { roles:1, name:1, avatar:1, introduction:1})
-            .exec().then(async (result) => {
-                ctx.body = {
-                  code: 200,
-                  message: '获取信息成功',
-                  data: {
-                    roles: result.roles,
-                    name: result.name,
-                    avatar: result.avatar,
-                  }
-                }
-            })
-            .catch((err) => {
-              ctx.body = {
-                code: 500,
-                message: err
-              }
-            })
-          } else {
-              ctx.body = {
-                code: 204,
-                message: 'token过期,请重新登录',
-              }
-          }
-
-        } else {
+    console.log(token);
+    let payload = await this.tokenVerify(token, keys.jwtKey);
+    if (payload.id) {
+        await UserModel.findOne({ _id: payload.id }, { roles:1, name:1, avatar:1, introduction:1})
+        .exec().then(async (result) => {
             ctx.body = {
-                message: 'token 错误',
-                code: -1
+              code: 200,
+              message: '获取信息成功',
+              data: {
+                roles: result.roles,
+                name: result.name,
+                avatar: result.avatar,
+              }
             }
-        }
-    // await UserModel.findOne({token: params.token}, { roles:1, name:1, avatar:1, introduction:1, tokenTime: 1 })
-    //         .exec().then(async (result) => {
-    //           // TODO:: 判断token过期没
-    //           if (this._isTokenTimeOut(result.tokenTime)) {
-    //             ctx.body = {
-    //               code: 204,
-    //               message: 'token过期,请重新登录',
-    //             }
-    //           } else {
-    //             ctx.body = {
-    //               code: 200,
-    //               message: '获取信息成功',
-    //               data: {
-    //                 roles: result.roles,
-    //                 name: result.name,
-    //                 avatar: result.avatar,
-    //               }
-    //             }
-    //           }
-    //         })
+        })
+        .catch((err) => {
+          ctx.body = {
+            code: 500,
+            message: err
+          }
+        })
+    } else {
+      ctx.body = {
+        message: 'token 错误',
+        code: 50008
+      }
+    }
   }
   // 更新用户资料
   async accountUpdated(ctx) {
@@ -292,12 +227,23 @@ class UserController
   }
 
   /**
-   * 判断token是否过期
-   * @param {String} Time 需要对比的时间戳
-   * @return {Boolean} 是否过期
+   *  解密jwt Token
+   * @param {String} Token 需要对比的时间戳
+   * @param {String} key  jwt需要解密的token名字
+   * @return {Object} 解密后的token
+   * { id: '5b2fa706cc0af413cce2d8de',
+      name: 'twins49',
+      iat: 1532584489,
+      exp: 1532588089 }
    */
-  tokenVerify() {
-
+  async tokenVerify(token, jwtKey) {
+    const verify = require('util').promisify(jwt.verify) // 解密工具
+    if (token && jwtKey) {
+      const payload = await verify(token.split(' ')[1], keys.jwtKey)
+      const nowDate = Math.floor(new Date() / 1000)
+      return  payload.exp - nowDate > 0 ? payload : false
+    }
+    return  false;
   }
 }
 module.exports = new UserController();
