@@ -30,4 +30,10 @@ router.post('/accountUpdated', async(ctx) => {
 router.get('/tokenVerify', async(ctx) => {
   await UserController.tokenVerify(ctx)
 })
+
+// 搜索账号
+router.get('/searchAccout', async(ctx) => {
+  await UserController.searchAccout(ctx)
+})
+
 module.exports = router

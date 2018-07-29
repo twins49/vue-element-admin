@@ -96,7 +96,7 @@
 
 <script>
   import waves from '@/directive/waves' // 水波纹指令
-  import { register, getLists, updated } from '@/api/adminUser'
+  import { register, getLists, updated, searchAccout } from '@/api/adminUser'
 
   export default {
     name: 'accountLists',
@@ -168,7 +168,21 @@
           })
       },
       handleFilter() {
-        console.log('提交查询了')
+        const params = {
+          page: 1,
+          pre_page: this.listQuery.pre_page,
+          name: this.listQuery.name
+        }
+        searchAccout(params)
+          .then((res) => {
+            const { code, data } = res.data
+            if (code === 200) {
+              this.lists = data
+            }
+          })
+          .catch((err) => {
+            this.$message.error(err)
+          })
       },
       handleCreate() {
         this.dialogStatus = 'create'

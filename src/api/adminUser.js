@@ -29,3 +29,11 @@ export function updated(params) {
     data: params
   })
 }
+
+export function searchAccout(params) {
+  return request({
+    url: '/admin-users/searchAccout',
+    method: 'get',
+    params
+  })
+}

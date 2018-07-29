@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const moment = require('moment');
 const bcrypt = require('bcrypt');
 const { guid } = require('../utils/string.js');
+const { errorHandle } = require('../utils/common.js');
 const gravatar = require('gravatar'); // 头像插件
 const jwt = require('jsonwebtoken'); // Token插件
 const keys = require('../config/keys.js'); // 配置文件
@@ -35,13 +36,10 @@ class UserController
             code:200,
             message:'注册成功'
           }
-      )
+        )
         .catch((err)=> {
-          ctx.body = {
-            code:500,
-            message:err
-          }
-      })
+            errorHandle(ctx, err)
+        })
   }
 
   // 用户登录
@@ -76,10 +74,7 @@ class UserController
       }
     })
     .catch((err)=> {
-      ctx.body = {
-        code:500,
-        message:'账号或者密码错误'
-      }
+      errorHandle(ctx, err)
     })
 
   }
@@ -144,10 +139,7 @@ class UserController
             }
         })
         .catch((err) => {
-          ctx.body = {
-            code: 500,
-            message: err
-          }
+          errorHandle(ctx, err)
         })
     } else {
       ctx.body = {
@@ -156,6 +148,7 @@ class UserController
       }
     }
   }
+
   // 更新用户资料
   async accountUpdated(ctx) {
     const param = ctx.request.body; // 拿到前端post过来的
@@ -184,6 +177,38 @@ class UserController
     // await ……
   }
 
+  // 查询账号
+  async searchAccout(ctx) {
+    const params = ctx.query; // get
+    const UserModel = mongoose.model('User');
+    const reg = new RegExp(params.name, 'i') //不区分大小写
+    const newArr = [];
+    const pageSet = {
+      page: (parseInt(params.page) - 1) || 0,
+      pre_page: parseInt(params.pre_page) || 5,
+    };
+    // 使用分页查询方法查询出结果
+    const users = await this._pageQuery(UserModel, pageSet, {'name': {$regex : reg}});
+      // 处理数据
+      for (let i = 0; i < users.dataList.length; i++) {
+        newArr.push({
+          roles: this._authorityForMat(users.dataList[i]['roles']),
+          createTime: moment( users.dataList[i]['createTime']).format('YYYY-MM-DD HH:mm:ss'),
+          lastLogin: moment( users.dataList[i]['lastLogin']).format('YYYY-MM-DD HH:mm:ss'),
+          name:  users.dataList[i]['name'],
+          introduction: users.dataList[i]['introduction'],
+          password: users.dataList[i]['pwd'],
+          email: users.dataList[i]['email'],
+          avatar: users.dataList[i]['avatar']
+        });
+      }
+      ctx.body = {
+        code: 200,
+        message: '查询成功',
+        data:newArr
+      }
+  }
+
   _authorityForMat(authority) {
     switch (authority[0]) {
       case 'admin':
@@ -204,7 +229,6 @@ class UserController
     })
     .catch((err)=> {
       console.log(err);
-      num = err;
     });
 
     // 查询记录
@@ -220,7 +244,7 @@ class UserController
       }
     })
     .catch((err)=> {
-      console.log(err);
+      errorHandle(ctx, err)
     })
     return result;
   }
