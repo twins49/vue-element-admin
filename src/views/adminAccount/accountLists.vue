@@ -68,6 +68,12 @@
               <el-option label="编辑" value="editor"></el-option>
             </el-select>
           </el-form-item>
+          <el-form-item label="状态" prop='status'>
+            <el-select v-model="addAccout.status"  placeholder="请选择状态" >
+              <el-option label="可用" value="1"></el-option>
+              <el-option label="禁止" value="0"></el-option>
+            </el-select>
+          </el-form-item>
           <el-form-item label="邮箱" prop='email'>
             <el-input type="email" v-model="addAccout.email"></el-input>
           </el-form-item>
@@ -135,12 +141,14 @@
           password: '',
           roles: '',
           authority: '',
-          email: ''
+          email: '',
+          status: ''
         },
         rules: {
           name: [{ required: true, message: '账号必须填写', trigger: 'change' }],
           password: [{ required: true, message: '密码必须填写', trigger: 'change' }],
           authority: [{ required: true, message: '请选择权限', trigger: 'change' }],
+          status: [{ required: true, message: '请选择账号状态', trigger: 'change' }],
           email: [{ require: true, validator: checkEmail, trigger: 'change' }]
         }
       }
@@ -219,7 +227,6 @@
                 this.$message.error('注册失败')
               })
           }
-          console.log('有错误')
         })
       },
       updateData() {

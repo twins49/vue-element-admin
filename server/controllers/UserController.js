@@ -27,6 +27,7 @@ class UserController
       roles: ctx.request.body.roles,
       introduction: ctx.request.body.introduction,
       email: ctx.request.body.email,
+      status: ctx.request.body.status,
       avatar:gravatar.url(ctx.request.body.email, {s: '200', r: 'pg', d: 'mm'})
     }
     const newUser = new UserModel(params);
