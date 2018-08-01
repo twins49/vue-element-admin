@@ -24,23 +24,23 @@ class UserController
     const params = {
       name: ctx.request.body.name,
       pwd: ctx.request.body.password,
-      roles: ctx.request.body.roles,
+      roles: [ctx.request.body.authority],
       introduction: ctx.request.body.introduction,
       email: ctx.request.body.email,
       status: ctx.request.body.status,
       avatar:gravatar.url(ctx.request.body.email, {s: '200', r: 'pg', d: 'mm'})
     }
     const newUser = new UserModel(params);
-      newUser.save()
-        .then(
-          ctx.body = {
-            code:200,
-            message:'注册成功'
-          }
-        )
-        .catch((err)=> {
-            errorHandle(ctx, err)
-        })
+    newUser.save()
+      .then(
+        ctx.body = {
+          code:200,
+          message:'注册成功'
+        }
+      )
+      .catch((err)=> {
+          errorHandle(ctx, err)
+      })
   }
 
   // 用户登录
@@ -58,6 +58,7 @@ class UserController
       // 用bcrypt的比较方法来验证密码
       const pwdMatchFlag = bcrypt.compareSync(param.password, user.pwd);
       if (pwdMatchFlag) {
+        await UserModel.update({name:param.username}, {lastLogin: Date.now()}).exec() // 更新最后登录时间
         //TODO:: 加密规则, 加密名字, 过期时间, (箭头函数)
         const token = jwt.sign({ id:user.id, name:user.name }, keys.jwtKey, {expiresIn: keys.tokenExpires})
         ctx.body = {
@@ -96,14 +97,15 @@ class UserController
     // 处理数据
     for (let i = 0; i < users.dataList.length; i++) {
       newArr.push({
-        roles: this._authorityForMat(users.dataList[i]['roles']),
+        authority: users.dataList[i]['roles'][0],
         createTime: moment( users.dataList[i]['createTime']).format('YYYY-MM-DD HH:mm:ss'),
         lastLogin: moment( users.dataList[i]['lastLogin']).format('YYYY-MM-DD HH:mm:ss'),
         name:  users.dataList[i]['name'],
         introduction: users.dataList[i]['introduction'],
         password: users.dataList[i]['pwd'],
         email: users.dataList[i]['email'],
-        avatar: users.dataList[i]['avatar']
+        avatar: users.dataList[i]['avatar'],
+        status: users.dataList[i]['status']
       });
     }
     result = {
@@ -155,7 +157,15 @@ class UserController
     const param = ctx.request.body; // 拿到前端post过来的
     const UserModel = mongoose.model('User');
     UserModel.update({name:param.name},
-      {password: param.password, roles: param.roles, introduction: param.introduction}
+      {
+        password: param.password,
+        roles: param.roles,
+        authority: param.authority,
+        email: param.email,
+        status: param.status,
+        introduction: param.introduction,
+        avatar: param.avatar
+      }
     ).exec()
       .then(
         ctx.body = {
@@ -168,9 +178,19 @@ class UserController
     })
   }
 
-  // 删除用户
-  async deluser() {
-    // await ……
+  // 删除账号
+  async deleteAccount(ctx) {
+    const UserModel = mongoose.model('User');
+    await UserModel.update(ctx.query, {status:'禁用'}).exec()
+      .then((res) => {
+        ctx.body = {
+          code: 200,
+          message: '删除账号成功'
+        }
+      })
+      .catch((err) => {
+        errorHandle(ctx, err)
+      })
   }
 
   // 重置密码
@@ -178,7 +198,7 @@ class UserController
     // await ……
   }
 
-  // 查询账号
+  // 搜索账号
   async searchAccout(ctx) {
     const params = ctx.query; // get
     const UserModel = mongoose.model('User');
@@ -193,14 +213,15 @@ class UserController
       // 处理数据
       for (let i = 0; i < users.dataList.length; i++) {
         newArr.push({
-          roles: this._authorityForMat(users.dataList[i]['roles']),
+          authority: users.dataList[i]['roles'][0],
           createTime: moment( users.dataList[i]['createTime']).format('YYYY-MM-DD HH:mm:ss'),
           lastLogin: moment( users.dataList[i]['lastLogin']).format('YYYY-MM-DD HH:mm:ss'),
           name:  users.dataList[i]['name'],
           introduction: users.dataList[i]['introduction'],
           password: users.dataList[i]['pwd'],
           email: users.dataList[i]['email'],
-          avatar: users.dataList[i]['avatar']
+          avatar: users.dataList[i]['avatar'],
+          status: users.dataList[i]['status']
         });
       }
       ctx.body = {

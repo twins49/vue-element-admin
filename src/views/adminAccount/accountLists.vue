@@ -17,7 +17,7 @@
       </el-button>
       <!-- 账号列表 -->
       <el-table :key='tableKey' :data="lists" v-loading="listLoading" element-loading-text="给我一点时间" border fit highlight-current-row
-      style="width: 1004px">
+      style="width: 1204px">
         <el-table-column align="center" label="账号名称" width="150">
           <template slot-scope="scope">
             {{scope.row.name}}
@@ -25,7 +25,8 @@
         </el-table-column>
         <el-table-column align="center" label="账号权限" width="100">
           <template slot-scope="scope">
-            {{scope.row.roles}}
+            <span v-if="scope.row.authority === 'admin'">管理员</span>
+            <span v-if="scope.row.authority === 'editor'">编辑员</span>
           </template>
         </el-table-column>
         <el-table-column align="center" label="创建时间" width="200">
@@ -38,6 +39,12 @@
             {{scope.row.lastLogin}}
           </template>
         </el-table-column>
+        <el-table-column align="center" label="账号状态" width="200">
+          <template slot-scope="scope">
+             <el-button v-if='scope.row.status=== "禁止"' type="info">禁止</el-button>
+             <el-button v-if='scope.row.status=== "可用"' type="primary">可用</el-button>
+          </template>
+        </el-table-column>
         <el-table-column align="center" label="备注" width="150">
           <template slot-scope="scope">
             <el-tooltip class="item" effect="dark" :content="scope.row.introduction" placement="left">
@@ -48,7 +55,7 @@
         <el-table-column align="center" label="操作" width="200">
           <template slot-scope="scope">
             <el-button @click="handleUpdate(scope.row)" type="primary" size="small">编辑</el-button>
-            <el-button type="danger" size="small">删除</el-button>
+            <!-- <el-button type="danger" size="small" @click="deleteAccount(scope.row)" >删除</el-button> -->
           </template>
         </el-table-column>
       </el-table>
@@ -63,15 +70,15 @@
             <el-input type='password' v-model="addAccout.password"></el-input>
           </el-form-item>
           <el-form-item label="账号权限" prop="authority">
-            <el-select v-model="addAccout.authority"  placeholder="请选择账号权限" >
+            <el-select v-model="addAccout.authority"  placeholder="请选择账号权限">
               <el-option label="管理员" value="admin"></el-option>
               <el-option label="编辑" value="editor"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="状态" prop='status'>
-            <el-select v-model="addAccout.status"  placeholder="请选择状态" >
-              <el-option label="可用" value="1"></el-option>
-              <el-option label="禁止" value="0"></el-option>
+            <el-select v-model="addAccout.status"  placeholder="请选择状态">
+              <el-option label="可用" value="可用"></el-option>
+              <el-option label="禁止" value="禁止"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="邮箱" prop='email'>
@@ -102,7 +109,7 @@
 
 <script>
   import waves from '@/directive/waves' // 水波纹指令
-  import { register, getLists, updated, searchAccout } from '@/api/adminUser'
+  import { register, getLists, updated, searchAccout, deleteAccount } from '@/api/adminUser'
 
   export default {
     name: 'accountLists',
@@ -140,7 +147,7 @@
           name: '',
           password: '',
           roles: '',
-          authority: '',
+          authority: 'editor',
           email: '',
           status: ''
         },
@@ -157,6 +164,7 @@
       this.getList()
     },
     methods: {
+      // 获取账号列表
       getList() {
         this.listLoading = true
         const params = {
@@ -165,16 +173,17 @@
         }
         getLists(params)
           .then((res) => {
-            this.lists = res.data.data
-            this.listQuery.page = res.data.pageContent.page
-            this.listQuery.total = res.data.pageContent.total
-            this.listQuery.pre_page = res.data.pageContent.pre_page
+            this.lists = res.data
+            this.listQuery.page = res.pageContent.page
+            this.listQuery.total = res.pageContent.total
+            this.listQuery.pre_page = res.pageContent.pre_page
             this.listLoading = false
           })
           .catch(() => {
             this.$message.error('获取账号列表失败')
           })
       },
+      // 账号搜素
       handleFilter() {
         const params = {
           page: 1,
@@ -183,7 +192,7 @@
         }
         searchAccout(params)
           .then((res) => {
-            const { code, data } = res.data
+            const { code, data } = res
             if (code === 200) {
               this.lists = data
             }
@@ -192,25 +201,33 @@
             this.$message.error(err)
           })
       },
+      // 添加账号
       handleCreate() {
         this.dialogStatus = 'create'
         this.dialogFormVisible = true
+        Object.keys(this.addAccout).forEach((key) => {
+          this.addAccout[key] = ''
+        })
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate() // 清除验证
         })
       },
+      // 编辑功能
       handleUpdate(row) {
         this.dialogStatus = 'update'
         this.dialogFormVisible = true
-        Object.assign(this.addAccout, row, { authority: row.roles }) // 导入要编辑的资料
+        Object.assign(this.addAccout, row) // 导入要编辑的资料
+        console.log(this.addAccout)
         this.$nextTick(() => {
           this.$refs['dataForm'].clearValidate() // 清除验证
         })
       },
+      // 添加账号功能处理
       createData() {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.addAccout.roles = this.formatRoles(this.addAccout.authority)
+            console.log('data', this.addAccout)
             // 注册账号信息
             register(this.addAccout)
               .then((res) => {
@@ -221,7 +238,7 @@
                 })
                 // 关闭对话框
                 this.dialogFormVisible = false
-                location.href = location.href
+                location.reload()
               })
               .catch(() => {
                 this.$message.error('注册失败')
@@ -229,6 +246,7 @@
           }
         })
       },
+      // 编辑账号功能处理
       updateData() {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
@@ -243,6 +261,7 @@
                 })
                 // 关闭对话框
                 this.dialogFormVisible = false
+                location.reload()
               })
               .catch(() => {
                 this.dialogFormVisible = false
@@ -252,6 +271,12 @@
                 })
               })
           }
+        })
+      },
+      // 账号删除
+      deleteAccount(row) {
+        deleteAccount({ name: row.name }).then((res) => {
+          console.log(res)
         })
       },
       formatRoles(roles) {

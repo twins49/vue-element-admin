@@ -49,7 +49,7 @@ const user = {
       const username = userInfo.username.trim()
       return new Promise((resolve, reject) => {
         loginByUsername(username, userInfo.password).then(response => {
-          const data = response.data
+          const data = response
           if (data.code === 200) {
             setToken(data.data.token)
             commit('SET_TOKEN', data.data.token)
@@ -66,7 +66,7 @@ const user = {
     GetUserInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
         getUserInfo(state.token).then(response => {
-          const data = response.data
+          const data = response
           if (data.code === 200) {
             commit('SET_ROLES', data.data.roles)
             commit('SET_NAME', data.data.name)

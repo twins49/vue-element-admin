@@ -27,7 +27,7 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     // 50008:非法的token; 50012:其他客户端登录了;  50014:Token 过期了;
-    if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
+    if (res.code === 50008 || res.code === 50012 || res.code === 50014 || res.code === 401) {
       MessageBox.confirm('你已被登出，可以取消继续留在该页面，或者重新登录', '确定登出', {
         confirmButtonText: '重新登录',
         cancelButtonText: '取消',
@@ -38,7 +38,7 @@ service.interceptors.response.use(
         })
       })
     }
-    return response
+    return response.data
   },
   /**
   * 下面的注释为通过response自定义code来标示请求状态，当code返回如下情况为权限有问题，登出并返回到登录页

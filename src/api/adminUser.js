@@ -30,9 +30,19 @@ export function updated(params) {
   })
 }
 
+// 搜素账号
 export function searchAccout(params) {
   return request({
     url: '/admin-users/searchAccout',
+    method: 'get',
+    params
+  })
+}
+
+// 删除账号
+export function deleteAccount(params) {
+  return request({
+    url: '/admin-users/deleteAccount',
     method: 'get',
     params
   })

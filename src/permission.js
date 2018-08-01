@@ -26,7 +26,7 @@ router.beforeEach((to, from, next) => {
     } else {
       if (store.getters.roles.length === 0) { // 判断当前用户是否已拉取完user_info信息
         store.dispatch('GetUserInfo').then(res => { // 拉取user_info
-          if (res.data.code === 204) {
+          if (res.code === 204) {
             store.commit('SET_ROLES', '')
             store.commit('SET_NAME', '')
             store.commit('SET_AVATAR', '')

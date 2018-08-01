@@ -36,4 +36,9 @@ router.get('/searchAccout', async(ctx) => {
   await UserController.searchAccout(ctx)
 })
 
+// 删除账号
+router.get('/deleteAccount', async(ctx) => {
+  await UserController.deleteAccount(ctx)
+})
+
 module.exports = router
