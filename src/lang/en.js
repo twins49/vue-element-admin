@@ -47,7 +47,10 @@ export default {
     clipboardDemo: 'Clipboard',
     i18n: 'I18n',
     adminACountManage: 'adminACountManage',
-    accountLists: 'accountLists'
+    goodsManage: 'goodsManage',
+    accountLists: 'accountLists',
+    goodsLists: 'goodsLists',
+    categoryLists: 'categoryLists'
   },
   navbar: {
     logOut: 'Log Out',

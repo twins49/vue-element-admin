@@ -252,6 +252,20 @@ export const asyncRouterMap = [
       { path: 'addAccount', component: _import('adminAccount/accountLists'), name: 'accountLists', meta: { title: 'accountLists', icon: 'table' }}
     ]
   },
+  {
+    path: '/goods',
+    component: Layout,
+    redirect: 'noredirect',
+    name: 'goods',
+    meta: {
+      title: 'goodsManage',
+      icon: 'user'
+    },
+    children: [
+      { path: 'goodsLists', component: _import('goods/goodsLists'), name: 'goodsLists', meta: { title: 'goodsLists', icon: 'table' }},
+      { path: 'categoryLists', component: _import('goods/categoryLists'), name: 'categoryLists', meta: { title: 'categoryLists', icon: 'table' }}
+    ]
+  },
 
   { path: '*', redirect: '/404', hidden: true }
 ]

@@ -47,7 +47,10 @@ export default {
     clipboardDemo: 'clipboard',
     i18n: '国际化',
     adminACountManage: '后台管理员列表',
-    accountLists: '账号列表'
+    goodsManage: '商品管理',
+    accountLists: '账号列表',
+    goodsLists: '商品列表',
+    categoryLists: '商品分类列表'
   },
   navbar: {
     logOut: '退出登录',

@@ -18,6 +18,7 @@ module.exports = (app) => {
     }))
   // 挂载子路由
   router.use('/api/v1/admin-users', require('../routes/users').routes()) // 加载顺序3
+  router.use('/api/v1/goods', require('../routes/goods').routes()) // 加载顺序3
   // 加载路由中间件
   app.use(router.routes(), router.allowedMethods())
 }
